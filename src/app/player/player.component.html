@@ -7,6 +7,12 @@
     [class.selected]="gameStateService.getSelectedFriendlyCard() === card"
     (click)="gameStateService.selectCardInHand(card, player.id === gameStateService.getCurrentPlayer().id, player.id)"
   >
-    {{ card.name }} ({{ card.stats.attack }}/{{ card.stats.defense }})
+    {{ card.name }}
+   <br>
+    Cost-{{ card.stats.cost }}
+    <br>
+    Atk-{{ card.stats.attack }}/Def-{{ card.stats.defense }}
+    <br>
+    Mov-{{ card.stats.movement }}/Rng-{{ card.stats.range }}
   </div>
 </div>
