@@ -1,0 +1,9 @@
+<div class="deck">
+  <h3>{{ deck.name }}</h3>
+  <div class="cards">
+    <div class="card" *ngFor="let card of deck.cards">
+      {{ card.name }}
+      <!-- Display additional card information as needed -->
+    </div>
+  </div>
+</div>

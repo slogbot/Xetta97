@@ -1,0 +1,20 @@
+.hand {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  border: 1px solid black;
+  padding: 5px;
+  margin: 5px;
+}
+.card.selected {
+  background-color: rgb(230, 173, 173);
+}
+.card-player1 {
+  background-color: lightblue;
+}
+
+.card-player2 {
+  background-color: lightgreen;
+}

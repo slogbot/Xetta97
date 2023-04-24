@@ -1,0 +1,42 @@
+
+<router-outlet></router-outlet>
+
+
+<div class="container">
+  <div class="board">
+    <app-game-board></app-game-board>
+<!-- Render the deck for player 1 -->
+<app-deck playerId="1"></app-deck>
+<!-- Render the deck for player 2 -->
+<app-deck playerId="2"></app-deck>
+<app-player *ngFor="let player of players" [player]="player"></app-player>
+  </div>
+  <div class="buttons">
+    <div>
+      Current Player: {{ gameStateService.getCurrentPlayer().name }}
+      <button (click)="gameStateService.switchPlayer()">Switch Player</button>
+    </div>
+
+    <div>
+      Current Phase: {{ gameStateService.getCurrentPhase() }}
+      <button (click)="gameStateService.switchPhase()">Switch Phase</button>
+    </div>
+    <button (click)="gameStateService.drawCard('1')">Draw Card for Player 1</button>
+    <button (click)="gameStateService.drawCard('2')">Draw Card for Player 2</button>
+    <button (click)="gameStateService.combat()">Combat</button>
+    <!-- Display player 1 mana -->
+<div>
+  <h2>Player 1</h2>
+  <p>Mana: {{ gameStateService.getMana('1') }}</p>
+</div>
+
+<!-- Display player 2 mana -->
+<div>
+  <h2>Player 2</h2>
+  <p>Mana: {{ gameStateService.getMana('2') }}</p>
+</div>
+
+  </div>
+</div>
+
+

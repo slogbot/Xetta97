@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.board {
+  /* Add any styles specific to the board content here */
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Adjust the gap between buttons as needed */
+  margin-left: 1rem; /* Adjust the space between the board and buttons as needed */
+}

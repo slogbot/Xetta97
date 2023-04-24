@@ -1,0 +1,17 @@
+.deck {
+  display: flex;
+  flex-direction: column;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  border: 1px solid black;
+  padding: 1em;
+  margin: 0.5em;
+  text-align: center;
+}
+

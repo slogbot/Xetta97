@@ -1,0 +1,12 @@
+<h3>{{ player.name }}'s Hand:</h3>
+<div class="hand">
+  <div
+    *ngFor="let card of player.hand.cards"
+    class="card"
+    [ngClass]="{ 'card-player1': card.owner === '1', 'card-player2': card.owner === '2' }"
+    [class.selected]="gameStateService.getSelectedFriendlyCard() === card"
+    (click)="gameStateService.selectCardInHand(card, player.id === gameStateService.getCurrentPlayer().id, player.id)"
+  >
+    {{ card.name }} ({{ card.stats.attack }}/{{ card.stats.defense }})
+  </div>
+</div>

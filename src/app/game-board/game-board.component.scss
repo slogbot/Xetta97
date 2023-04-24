@@ -1,0 +1,32 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  border: 1px solid #ccc;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.card {
+  background-color: #3cff00;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.card-player1 {
+  background-color: lightblue;
+}
+
+.card-player2 {
+  background-color: lightgreen;
+}
