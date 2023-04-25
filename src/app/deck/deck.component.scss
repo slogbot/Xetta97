@@ -6,14 +6,12 @@
 .cards {
   display: flex;
   flex-wrap: wrap;
-
 }
 
 .card {
   border: 1px solid black;
+  padding: 1em;
   margin: 0.5em;
-
-  width: 25px;
-  font-size: 12px;
+  text-align: center;
 }
 

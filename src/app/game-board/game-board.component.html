@@ -1,16 +1,13 @@
 <div class="game-board">
   <div *ngFor="let row of board" class="row">
-    <div *ngFor="let cell of row" class="cell" [ngClass]="{'highlighted': cell.highlighted}" (click)="handleCellClick(cell)">
+    <div *ngFor="let cell of row" class="cell" (click)="handleCellClick(cell)">
       <div
         *ngIf="cell.card"
         class="card"
         [ngClass]="{ 'card-player1': cell.card.owner === '1', 'card-player2': cell.card.owner === '2' }"
         (click)="selectCardOnBoard($event, cell.card)"
       >
-        Atk-{{ cell.card ? cell.card.stats.attack : 'Empty' }}
-        <br>Def-{{ cell.card ? cell.card.stats.defense : 'Empty' }}
-        <br>Mov-{{ cell.card ? cell.card.stats.movement : 'Empty' }}
-        <br>Rng-{{ cell.card ? cell.card.stats.range : 'Empty' }}
+        {{ cell.card ? cell.card.name : 'Empty' }}
       </div>
     </div>
   </div>
