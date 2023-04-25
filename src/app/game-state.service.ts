@@ -21,6 +21,8 @@ export class GameStateService {
   private selectedMovementCard: Card | null = null;
   private selectedAttackerCard: Card | null = null;
   private selectedDefenderCard: Card | null = null;
+  private highlightedCells: GridCell[] = [];
+
 
 
 
@@ -67,16 +69,16 @@ export class GameStateService {
   // Create a deck with default data (can be replaced with server data later)
   private createDeck(owner: string): Deck {
     const cards: Card[] = [
-      { id: '1', name: 'Card 1', stats: { attack: 4, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '2', name: 'Card 2', stats: { attack: 3, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '3', name: 'Card 3', stats: { attack: 2, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '4', name: 'Card 4', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '5', name: 'Card 5', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '6', name: 'Card 6', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '7', name: 'Card 7', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '8', name: 'Card 8', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '9', name: 'Card 9', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
-      { id: '10', name: 'Card 10', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '1', name: 'Card 1', stats: { attack: 4, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '2', name: 'Card 2', stats: { attack: 3, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '3', name: 'Card 3', stats: { attack: 2, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '4', name: 'Card 4', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '5', name: 'Card 5', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '6', name: 'Card 6', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '7', name: 'Card 7', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '8', name: 'Card 8', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '9', name: 'Card 9', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '10', name: 'Card 10', stats: { attack: 1, defense: 1, movement: 3, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
 
     ];
 
@@ -181,6 +183,7 @@ switchPhase(): void {
   this.selectedMovementCard = null;
   this.selectedAttackerCard = null;
   this.selectedDefenderCard = null;
+  this.clearHighlights();
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,10 +249,13 @@ selectCardOnBoard(card: Card, playerId: string): void {
   if (this.phase === 2 && card.owner === playerId && playerId === currentPlayerId) {
     if (this.selectedMovementCard === card) {
       this.selectedMovementCard = null;
+      this.clearHighlights(); // Add this line
     } else {
       this.selectedMovementCard = card;
+      this.highlightValidMoves(card); // Add this line
     }
     console.log("Card selected for movement:", this.selectedMovementCard);
+
 //Select Cards For Combat
   } else if (this.phase === 3 && playerId === currentPlayerId) {
     if (card.owner === playerId) {
@@ -288,7 +294,6 @@ moveCardToCell(selectedCard: Card, targetCell: GridCell): void {
     return;
   }
 
-  // Calculate the distance between the current cell and the target cell
   const currentCell = this.board
     .flatMap(row => row)
     .find(cell => cell.card === selectedCard);
@@ -298,19 +303,68 @@ moveCardToCell(selectedCard: Card, targetCell: GridCell): void {
     return;
   }
 
-  const distance = Math.abs(targetCell.x - currentCell.x) + Math.abs(targetCell.y - currentCell.y);
-
-  if (distance <= selectedCard.stats.movement) {
-    // Move the card to the target cell
+  const path = this.bfsPathfinding(currentCell, targetCell);
+  if (path && path.length <= selectedCard.stats.movement + 1) {
     currentCell.card = null;
     targetCell.card = selectedCard;
     selectedCard.hasMoved = true;
 
-    // Deselect the card
+    // Deselect the card and clear highlights
     this.selectedMovementCard = null;
+    this.clearHighlights(); // Add this line
   } else {
-    console.log("Invalid move: Exceeds movement range");
+    console.log("Invalid move: Exceeds movement range or no valid path");
   }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+private bfsPathfinding(start: GridCell, end: GridCell): GridCell[] | null {
+  const queue: GridCell[][] = [[start]];
+  const visited = new Set<string>();
+
+  while (queue.length > 0) {
+    const path = queue.shift() as GridCell[];
+    const cell = path[path.length - 1];
+
+    if (cell === end) {
+      return path;
+    }
+
+    const key = `${cell.x},${cell.y}`;
+    if (visited.has(key)) {
+      continue;
+    }
+    visited.add(key);
+
+    const neighbors = this.getNeighbors(cell);
+    for (const neighbor of neighbors) {
+      if (!visited.has(`${neighbor.x},${neighbor.y}`) && !neighbor.card) {
+        queue.push([...path, neighbor]);
+      }
+    }
+  }
+
+  return null;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+private getNeighbors(cell: GridCell): GridCell[] {
+  const x = cell.x;
+  const y = cell.y;
+  const neighbors: GridCell[] = [];
+
+  if (x > 0) {
+    neighbors.push(this.board[y][x - 1]);
+  }
+  if (x < this.board[0].length - 1) {
+    neighbors.push(this.board[y][x + 1]);
+  }
+  if (y > 0) {
+    neighbors.push(this.board[y - 1][x]);
+  }
+  if (y < this.board.length - 1) {
+    neighbors.push(this.board[y + 1][x]);
+  }
+
+  return neighbors;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 private getCellByCard(card: Card): GridCell | null {
@@ -423,5 +477,45 @@ getSelectedFriendlyCard(): Card | null {
   return this.selectedFriendlyCard;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+highlightValidMoves(selectedCard: Card): void {
+  if (!selectedCard || selectedCard.hasMoved) {
+    return;
+  }
 
+  const currentCell = this.board
+    .flatMap(row => row)
+    .find(cell => cell.card === selectedCard);
+
+  if (!currentCell) {
+    console.log("Current cell not found");
+    return;
+  }
+
+  // Clear previous highlights
+  this.clearHighlights();
+
+  // Loop through all cells and check if they are valid for moving the selected card
+  for (const row of this.board) {
+    for (const cell of row) {
+      if (cell.card) {
+        continue;
+      }
+
+      const path = this.bfsPathfinding(currentCell, cell);
+      if (path && path.length <= selectedCard.stats.movement + 1) {
+        // Add a 'highlighted' property to the cell and set it to true
+        (cell as any).highlighted = true;
+        this.highlightedCells.push(cell);
+      }
+    }
+  }
+}
+
+// Call this function when a card is deselected
+clearHighlights(): void {
+  for (const cell of this.highlightedCells) {
+    (cell as any).highlighted = false;
+  }
+  this.highlightedCells = [];
+}
 }

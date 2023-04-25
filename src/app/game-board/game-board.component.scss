@@ -9,8 +9,8 @@
 
 .cell {
   border: 1px solid #ccc;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -22,6 +22,11 @@
   padding: 5px;
   border-radius: 5px;
   font-size: 12px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 .card-player1 {
   background-color: lightblue;
@@ -30,3 +35,9 @@
 .card-player2 {
   background-color: lightgreen;
 }
+.highlighted {
+  background-color: rgb(112, 112, 112);
+}
+
+
+
