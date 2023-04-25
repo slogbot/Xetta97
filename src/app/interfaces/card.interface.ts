@@ -12,5 +12,6 @@ export interface Card {
   };
   // Other attributes
   owner: string; // Add this line
-
+  hasMoved: boolean; // Add this line
+  hasAttacked : boolean
 }

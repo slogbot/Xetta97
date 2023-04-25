@@ -7,6 +7,7 @@ import { GridCell } from './interfaces/grid-cell.interface';
 import { Hand } from './interfaces/hand.interface';
 
 
+
 @Injectable({
   providedIn: 'root',
 })
@@ -47,7 +48,7 @@ export class GameStateService {
       name: 'Player 1',
       deck: this.createDeck('1'),
       hand: { cards: [], maxSize: 5 },
-      mana: 10, // Add this line
+      mana: 20, // Add this line
     };
 
     const player2: Player = {
@@ -55,7 +56,7 @@ export class GameStateService {
       name: 'Player 2',
       deck: this.createDeck('2'),
       hand: { cards: [], maxSize: 5 },
-      mana: 10,
+      mana: 20,
     };
 
 
@@ -66,16 +67,16 @@ export class GameStateService {
   // Create a deck with default data (can be replaced with server data later)
   private createDeck(owner: string): Deck {
     const cards: Card[] = [
-      { id: '1', name: 'Card 1', stats: { attack: 4, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '2', name: 'Card 2', stats: { attack: 3, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '3', name: 'Card 3', stats: { attack: 2, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '4', name: 'Card 4', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '5', name: 'Card 5', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '6', name: 'Card 6', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '7', name: 'Card 7', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '8', name: 'Card 8', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '9', name: 'Card 9', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
-      { id: '10', name: 'Card 10', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner },
+      { id: '1', name: 'Card 1', stats: { attack: 4, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '2', name: 'Card 2', stats: { attack: 3, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '3', name: 'Card 3', stats: { attack: 2, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '4', name: 'Card 4', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '5', name: 'Card 5', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '6', name: 'Card 6', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '7', name: 'Card 7', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '8', name: 'Card 8', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '9', name: 'Card 9', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
+      { id: '10', name: 'Card 10', stats: { attack: 1, defense: 1, movement: 2, range:2, cost:6 }, owner, hasMoved: false, hasAttacked: false },
 
     ];
 
@@ -163,6 +164,18 @@ switchPlayer(): void {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 switchPhase(): void {
+    // If moving from phase 2 to phase 1, reset the `hasMoved` and 'hasAttacked' flag for all cards
+    if (this.phase === 2) {
+      this.board
+        .flatMap(row => row)
+        .filter(cell => cell.card)
+        .forEach(cell => {
+          if (cell.card) {
+            cell.card.hasMoved = false;
+            cell.card.hasAttacked = false;
+          }
+        });
+    }
   this.phase = (this.phase % 3) + 1;
   this.selectedFriendlyCard = null;
   this.selectedMovementCard = null;
@@ -270,7 +283,7 @@ getSelectedBoardCard(): Card | null {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 moveCardToCell(selectedCard: Card, targetCell: GridCell): void {
-  if (this.phase !== 2 || !selectedCard || targetCell.card) {
+  if (this.phase !== 2 || !selectedCard || targetCell.card || selectedCard.hasMoved) {
     console.log("Invalid move");
     return;
   }
@@ -291,6 +304,7 @@ moveCardToCell(selectedCard: Card, targetCell: GridCell): void {
     // Move the card to the target cell
     currentCell.card = null;
     targetCell.card = selectedCard;
+    selectedCard.hasMoved = true;
 
     // Deselect the card
     this.selectedMovementCard = null;
@@ -316,7 +330,10 @@ combat(): void {
     console.log("Both attacker and defender cards must be selected");
     return;
   }
-
+  if (this.selectedAttackerCard.hasAttacked) {
+    console.log("This card has already attacked");
+    return;
+  }
   const attackerCell = this.getCellByCard(this.selectedAttackerCard);
   const defenderCell = this.getCellByCard(this.selectedDefenderCard);
 
@@ -348,6 +365,7 @@ combat(): void {
     if (defenderCell) {
       defenderCell.card = null;
     }
+    this.selectedAttackerCard.hasAttacked = true;
   } else if (attackerTotal < defenderTotal) {
     console.log("Defender wins!");
     // Remove the attacker card from the board
